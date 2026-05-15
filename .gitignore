@@ -1,0 +1,9 @@
+node_modules/
+.env
+*.sqlite
+*.sqlite3
+data/
+playtests.db
+*.log
+.DS_Store
+dist/
