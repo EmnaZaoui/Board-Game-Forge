@@ -1,0 +1,53 @@
+type Game {
+  id: ID!
+  name: String!
+  description: String!
+  rules: String!
+  creatorId: String!
+  averageRating: Float!
+  categories: [String!]!
+  createdAt: String!
+}
+
+type PlaytestSession {
+  id: ID!
+  gameId: String!
+  userId: String!
+  state: String!
+  moves: String!
+  startedAt: String!
+  completedAt: String
+  score: Int
+}
+
+type Recommendation {
+  gameId: ID!
+  name: String!
+  score: Float!
+}
+
+type AuthResponse {
+  success: Boolean!
+  message: String!
+  token: String
+  userId: String
+}
+
+type Query {
+  games: [Game!]!
+  game(id: ID!): Game
+  playtestStatus(sessionId: ID!): PlaytestSession
+  recommendations(userId: String!, limit: Int): [Recommendation!]!
+}
+
+type Mutation {
+  register(username: String!, password: String!, email: String!): AuthResponse!
+  login(username: String!, password: String!): AuthResponse!
+  createGame(name: String!, description: String!, rules: String!, categories: [String!]!): Game!
+  startPlaytest(gameId: ID!): PlaytestSession!
+  submitMove(sessionId: ID!, moveJson: String!): SubmitMoveResponse!
+  completePlaytest(sessionId: ID!, score: Int!): CompletePlaytestResponse!
+}
+
+type SubmitMoveResponse { success: Boolean! newState: String! }
+type CompletePlaytestResponse { success: Boolean! }
