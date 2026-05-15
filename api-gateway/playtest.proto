@@ -1,0 +1,22 @@
+syntax = "proto3";
+package playtest;
+
+message PlaytestSession {
+  string id = 1; string gameId = 2; string userId = 3; string state = 4;
+  string moves = 5; string startedAt = 6; string completedAt = 7; int32 score = 8;
+}
+message StartPlaytestRequest { string gameId = 1; string userId = 2; }
+message StartPlaytestResponse { PlaytestSession session = 1; }
+message SubmitMoveRequest { string sessionId = 1; string moveJson = 2; }
+message SubmitMoveResponse { bool success = 1; string newState = 2; }
+message GetPlaytestStatusRequest { string sessionId = 1; }
+message GetPlaytestStatusResponse { PlaytestSession session = 1; }
+message CompletePlaytestRequest { string sessionId = 1; int32 score = 2; }
+message CompletePlaytestResponse { bool success = 1; }
+
+service PlaytestService {
+  rpc StartPlaytest(StartPlaytestRequest) returns (StartPlaytestResponse);
+  rpc SubmitMove(SubmitMoveRequest) returns (SubmitMoveResponse);
+  rpc GetPlaytestStatus(GetPlaytestStatusRequest) returns (GetPlaytestStatusResponse);
+  rpc CompletePlaytest(CompletePlaytestRequest) returns (CompletePlaytestResponse);
+}
