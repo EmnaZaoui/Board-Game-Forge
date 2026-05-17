@@ -28,25 +28,38 @@ function generateUUID() { return Date.now() + '-' + Math.random().toString(36); 
 
 const server = new grpc.Server();
 server.addService(proto.GameDesignerService.service, {
-  CreateGame: async (call, callback) => {
-    const { name, description, rules, creatorId, categories } = call.request;
-    const id = generateUUID();
-    const createdAt = new Date().toISOString();
-    const categoriesStr = JSON.stringify(categories);
-    db.run(`INSERT INTO games (id, name, description, rules, creatorId, averageRating, categories, createdAt) VALUES (?,?,?,?,?,?,?,?)`,
-      [id, name, description, rules, creatorId, 0, categoriesStr, createdAt], async (err) => {
-        if (err) return callback({ code: grpc.status.INTERNAL, details: err.message });
-        const game = { id, name, description, rules, creatorId, averageRating: 0, categories, createdAt };
-        if (categories && categories.length > 0) {
-          await producer.connect();
+CreateGame: async (call, callback) => {
+  const { name, description, rules, creatorId, categories } = call.request;
+  const id = generateUUID();
+  const createdAt = new Date().toISOString();
+  const categoriesStr = JSON.stringify(categories);
+
+  db.run(
+    `INSERT INTO games (id, name, description, rules, creatorId, averageRating, categories, createdAt)
+     VALUES (?,?,?,?,?,?,?,?)`,
+    [id, name, description, rules, creatorId, 0, categoriesStr, createdAt],
+    async (err) => {
+      if (err) return callback({ code: grpc.status.INTERNAL, details: err.message });
+
+      const game = { id, name, description, rules, creatorId, averageRating: 0, categories, createdAt };
+
+      if (categories && categories.length > 0) {
+       
+        try {
           await producer.send({
             topic: 'game.published',
             messages: [{ value: JSON.stringify({ gameId: id, title: name, categories, creatorId }) }]
           });
+          console.log(`game.published envoyé : ${id} - ${name}`);
+        } catch (kafkaErr) {
+          console.error('Erreur envoi game.published :', kafkaErr.message);
         }
-        callback(null, { game });
-      });
-  },
+      }
+
+      callback(null, { game });
+    }
+  );
+},
   GetGame: (call, callback) => {
     db.get(`SELECT * FROM games WHERE id = ?`, [call.request.gameId], (err, row) => {
       if (err || !row) return callback({ code: grpc.status.NOT_FOUND, details: 'Game not found' });
