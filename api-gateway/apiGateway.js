@@ -1,4 +1,4 @@
-// api-gateway/apiGateway.js
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -6,6 +6,7 @@ const { ApolloServer } = require('@apollo/server');
 const { expressMiddleware } = require('@apollo/server/express4');
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
+const { Kafka } = require('kafkajs');
 const fs = require('fs');
 const path = require('path');
 
@@ -166,6 +167,53 @@ async function startGraphQL() {
   }));
 }
 startGraphQL();
+
+
+// ---------- SSE pour Kafka (affichage temps réel) ----------
+const kafka = new Kafka({ brokers: [process.env.KAFKA_BROKER || 'localhost:9092'] });
+const consumer = kafka.consumer({ groupId: 'api-gateway-sse-group' });
+
+let clients = [];
+let lastEvents = []; // garder les 50 derniers événements
+
+async function startKafkaConsumer() {
+  await consumer.connect();
+  await consumer.subscribe({ topics: ['game.published', 'playtest.completed', 'game.rated'], fromBeginning: false });
+  await consumer.run({
+    eachMessage: async ({ topic, message }) => {
+      const event = {
+        topic,
+        value: JSON.parse(message.value.toString()),
+        timestamp: new Date().toISOString()
+      };
+      lastEvents.unshift(event);
+      if (lastEvents.length > 50) lastEvents.pop();
+      clients.forEach(client => client.write(`data: ${JSON.stringify(event)}\n\n`));
+    }
+  });
+}
+startKafkaConsumer().catch(console.error);
+
+// Route SSE
+app.get('/api/kafka/stream', (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+  res.write('retry: 10000\n\n');
+  lastEvents.forEach(event => res.write(`data: ${JSON.stringify(event)}\n\n`));
+  const clientId = Date.now();
+  const newClient = { id: clientId, write: res.write.bind(res) };
+  clients.push(newClient);
+  req.on('close', () => {
+    clients = clients.filter(c => c.id !== clientId);
+  });
+});
+
+app.get('/api/kafka/history', (req, res) => {
+  res.json(lastEvents);
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

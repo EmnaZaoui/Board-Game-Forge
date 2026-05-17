@@ -1,0 +1,55 @@
+body {
+  background-color: #0a0f1e;
+  color: #e0e0e0;
+  font-family: 'Courier New', 'Press Start 2P', monospace;
+}
+.gaming-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.gaming-card {
+  background: #1e1a2f;
+  border: 2px solid #ffd966;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 10px rgba(255, 217, 102, 0.3);
+}
+.gaming-title {
+  color: #ffd966;
+  text-shadow: 2px 2px 0 #5a3e1b;
+  border-bottom: 2px solid #ffd966;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+.gaming-button {
+  background: #2a2542;
+  color: #ffd966;
+  border: 1px solid #ffd966;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.gaming-button:hover {
+  background: #ffd966;
+  color: #1e1a2f;
+}
+.gaming-input, .gaming-textarea {
+  background: #0f0c19;
+  border: 1px solid #ffd966;
+  color: #ffd966;
+  padding: 8px;
+  border-radius: 5px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+.kafka-event {
+  background: #0a0a0a;
+  border-left: 4px solid #ffd966;
+  padding: 8px;
+  font-family: monospace;
+  font-size: 12px;
+  margin: 5px 0;
+}
