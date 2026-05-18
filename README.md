@@ -701,6 +701,21 @@ mutation {
 
 ---
 
+### 🧪 Tester avec Postman (gRPC)
+
+> **Prérequis** : Postman v10+ avec support gRPC natif.
+
+**Configuration initiale (à faire une seule fois) :**
+
+1. Ouvrir Postman → **New** → **gRPC Request**
+2. Saisir l'URL du service ciblé (ex: `localhost:50053`)
+3. Cliquer sur **Import a .proto file** et sélectionner le fichier `.proto` correspondant
+4. Sélectionner la méthode dans le menu déroulant **Method**
+5. Coller le JSON dans l'onglet **Message**
+6. Cliquer sur **Invoke**
+
+---
+
 ### 🔐 Auth Service — `auth.proto` — Port `50053`
 
 ```protobuf
@@ -708,8 +723,8 @@ syntax = "proto3";
 package auth;
 
 service AuthService {
-  rpc Register(RegisterRequest)     returns (RegisterResponse);
-  rpc Login(LoginRequest)           returns (LoginResponse);
+  rpc Register(RegisterRequest)       returns (RegisterResponse);
+  rpc Login(LoginRequest)             returns (LoginResponse);
   rpc VerifyToken(VerifyTokenRequest) returns (VerifyTokenResponse);
 }
 ```
@@ -734,16 +749,19 @@ service AuthService {
 | `message` | string | `"User created"` ou message d'erreur |
 | `userId` | string | ID généré pour le nouvel utilisateur |
 
-**Exemple d'appel gRPC (grpcurl)** :
-```bash
-grpcurl -plaintext -d '{
+- **URL** : `localhost:50053`
+- **Méthode** : `auth.AuthService/Register`
+- **Message** :
+
+```json
+{
   "username": "emna.zaoui",
   "password": "emna123",
   "email": "emna.zaoui@polytechnicien.tn"
-}' localhost:50053 auth.AuthService/Register
+}
 ```
 
-**Réponse** :
+**Réponse attendue** :
 ```json
 {
   "success": true,
@@ -779,15 +797,18 @@ grpcurl -plaintext -d '{
 | `message` | string | `"Logged in"` |
 | `userId` | string | ID de l'utilisateur |
 
-**Exemple d'appel gRPC** :
-```bash
-grpcurl -plaintext -d '{
+- **URL** : `localhost:50053`
+- **Méthode** : `auth.AuthService/Login`
+- **Message** :
+
+```json
+{
   "username": "emna.zaoui",
   "password": "emna123"
-}' localhost:50053 auth.AuthService/Login
+}
 ```
 
-**Réponse** :
+**Réponse attendue** :
 ```json
 {
   "success": true,
@@ -822,11 +843,14 @@ grpcurl -plaintext -d '{
 | `userId` | string | ID extrait du token (si valide) |
 | `username` | string | Username extrait du token (si valide) |
 
-**Exemple d'appel gRPC** :
-```bash
-grpcurl -plaintext -d '{
+- **URL** : `localhost:50053`
+- **Méthode** : `auth.AuthService/VerifyToken`
+- **Message** :
+
+```json
+{
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}' localhost:50053 auth.AuthService/VerifyToken
+}
 ```
 
 **Réponse (token valide)** :
@@ -849,6 +873,7 @@ grpcurl -plaintext -d '{
 > portant un header `Authorization: Bearer <token>`. Elle n'est jamais exposée directement au client.
 
 ---
+
 ### 🎮 Game Designer Service — `gameDesigner.proto` — Port `50051`
 
 ```protobuf
@@ -856,11 +881,11 @@ syntax = "proto3";
 package gamedesigner;
 
 service GameDesignerService {
-  rpc CreateGame(CreateGameRequest)   returns (CreateGameResponse);
-  rpc GetGame(GetGameRequest)         returns (GetGameResponse);
-  rpc UpdateGame(UpdateGameRequest)   returns (UpdateGameResponse);
-  rpc DeleteGame(DeleteGameRequest)   returns (DeleteGameResponse);
-  rpc ListGames(ListGamesRequest)     returns (ListGamesResponse);
+  rpc CreateGame(CreateGameRequest)     returns (CreateGameResponse);
+  rpc GetGame(GetGameRequest)           returns (GetGameResponse);
+  rpc UpdateGame(UpdateGameRequest)     returns (UpdateGameResponse);
+  rpc DeleteGame(DeleteGameRequest)     returns (DeleteGameResponse);
+  rpc ListGames(ListGamesRequest)       returns (ListGamesResponse);
   rpc UpdateRating(UpdateRatingRequest) returns (UpdateRatingResponse);
 }
 ```
@@ -880,23 +905,23 @@ service GameDesignerService {
 
 ---
 
-### 🧪 Tester avec Postman (gRPC)
-
-> **Prérequis** : Postman v10+ avec support gRPC natif.
-
-**Configuration initiale (à faire une seule fois) :**
-
-1. Ouvrir Postman → **New** → **gRPC Request**
-2. Dans le champ URL : `localhost:50051` (ou le port du service ciblé)
-3. Cliquer sur **Import a .proto file** et sélectionner `gameDesigner.proto`  
-   *(ou activer la réflexion si le serveur la supporte)*
-4. Sélectionner la méthode dans le menu déroulant **Method**
-5. Coller le JSON dans l'onglet **Message**
-6. Cliquer sur **Invoke**
-
----
-
 #### `CreateGame` — Créer un jeu
+
+**Request** `CreateGameRequest` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `name` | string | Nom du jeu |
+| `description` | string | Description |
+| `rules` | string | Règles |
+| `creatorId` | string | ID du créateur (injecté depuis le JWT) |
+| `categories` | repeated string | Catégories (ex: `["Stratégie","2 joueurs"]`) |
+
+**Response** `CreateGameResponse` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `game` | Game | Objet jeu complet créé |
 
 - **URL** : `localhost:50051`
 - **Méthode** : `gamedesigner.GameDesignerService/CreateGame`
@@ -940,6 +965,18 @@ service GameDesignerService {
 
 #### `GetGame` — Récupérer un jeu
 
+**Request** `GetGameRequest` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `gameId` | string | ID du jeu à récupérer |
+
+**Response** `GetGameResponse` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `game` | Game | Objet jeu complet |
+
 - **URL** : `localhost:50051`
 - **Méthode** : `gamedesigner.GameDesignerService/GetGame`
 - **Message** :
@@ -959,6 +996,22 @@ service GameDesignerService {
 ---
 
 #### `UpdateGame` — Modifier un jeu
+
+**Request** `UpdateGameRequest` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `gameId` | string | ID du jeu à modifier |
+| `name` | string | Nouveau nom |
+| `description` | string | Nouvelle description |
+| `rules` | string | Nouvelles règles |
+| `categories` | repeated string | Nouvelles catégories |
+
+**Response** `UpdateGameResponse` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `success` | bool | `true` si la modification a réussi |
 
 - **URL** : `localhost:50051`
 - **Méthode** : `gamedesigner.GameDesignerService/UpdateGame`
@@ -984,6 +1037,18 @@ service GameDesignerService {
 
 #### `DeleteGame` — Supprimer un jeu
 
+**Request** `DeleteGameRequest` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `gameId` | string | ID du jeu à supprimer |
+
+**Response** `DeleteGameResponse` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `success` | bool | `true` si la suppression a réussi |
+
 - **URL** : `localhost:50051`
 - **Méthode** : `gamedesigner.GameDesignerService/DeleteGame`
 - **Message** :
@@ -997,6 +1062,14 @@ service GameDesignerService {
 ---
 
 #### `ListGames` — Lister tous les jeux
+
+**Request** `ListGamesRequest` : *(vide)*
+
+**Response** `ListGamesResponse` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `games` | repeated Game | Liste de tous les jeux |
 
 - **URL** : `localhost:50051`
 - **Méthode** : `gamedesigner.GameDesignerService/ListGames`
@@ -1012,6 +1085,19 @@ service GameDesignerService {
 
 > ⚠️ Cette méthode est **réservée à l'usage interne**. Elle est appelée uniquement
 > par le consumer Kafka `game.rated` du service lui-même — jamais exposée au client.
+
+**Request** `UpdateRatingRequest` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `gameId` | string | ID du jeu |
+| `newAverage` | double | Nouvelle note moyenne calculée |
+
+**Response** `UpdateRatingResponse` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `success` | bool | `true` si la mise à jour a réussi |
 
 - **URL** : `localhost:50051`
 - **Méthode** : `gamedesigner.GameDesignerService/UpdateRating`
@@ -1057,6 +1143,19 @@ service PlaytestService {
 
 #### `StartPlaytest` — Démarrer une session
 
+**Request** `StartPlaytestRequest` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `gameId` | string | ID du jeu à tester |
+| `userId` | string | ID du joueur (injecté depuis le JWT) |
+
+**Response** `StartPlaytestResponse` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `session` | PlaytestSession | Session créée avec `state: "in_progress"` |
+
 - **URL** : `localhost:50052`
 - **Méthode** : `playtest.PlaytestService/StartPlaytest`
 - **Message** :
@@ -1094,6 +1193,20 @@ service PlaytestService {
 
 #### `SubmitMove` — Soumettre un mouvement
 
+**Request** `SubmitMoveRequest` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `sessionId` | string | UUID de la session |
+| `moveJson` | string | Objet mouvement sérialisé en JSON string |
+
+**Response** `SubmitMoveResponse` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `success` | bool | `true` si le mouvement a été enregistré |
+| `newState` | string | État de la session après le mouvement |
+
 - **URL** : `localhost:50052`
 - **Méthode** : `playtest.PlaytestService/SubmitMove`
 - **Message** :
@@ -1124,6 +1237,18 @@ service PlaytestService {
 
 #### `GetPlaytestStatus` — État d'une session
 
+**Request** `GetPlaytestStatusRequest` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `sessionId` | string | UUID de la session |
+
+**Response** `GetPlaytestStatusResponse` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `session` | PlaytestSession | État complet de la session |
+
 - **URL** : `localhost:50052`
 - **Méthode** : `playtest.PlaytestService/GetPlaytestStatus`
 - **Message** :
@@ -1143,6 +1268,19 @@ service PlaytestService {
 ---
 
 #### `CompletePlaytest` — Terminer une session
+
+**Request** `CompletePlaytestRequest` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `sessionId` | string | UUID de la session à clôturer |
+| `score` | int32 | Score final obtenu |
+
+**Response** `CompletePlaytestResponse` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `success` | bool | `true` si la session est bien clôturée |
 
 - **URL** : `localhost:50052`
 - **Méthode** : `playtest.PlaytestService/CompletePlaytest`
@@ -1185,9 +1323,30 @@ service RecommendationService {
 }
 ```
 
+**Type `GameRecommendation`** :
+
+| Champ | Type | Description |
+|---|---|---|
+| `gameId` | string | ID du jeu recommandé |
+| `name` | string | Nom du jeu |
+| `score` | double | Score de pertinence |
+
 ---
 
 #### `GetRecommendations` — Obtenir des recommandations
+
+**Request** `GetRecommendationsRequest` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `userId` | string | ID de l'utilisateur cible |
+| `limit` | int32 | Nombre maximum de résultats (défaut : 10) |
+
+**Response** `GetRecommendationsResponse` :
+
+| Champ | Type | Description |
+|---|---|---|
+| `recommendations` | repeated GameRecommendation | Liste des jeux recommandés |
 
 - **URL** : `localhost:50054`
 - **Méthode** : `recommendation.RecommendationService/GetRecommendations`
@@ -1237,7 +1396,6 @@ service RecommendationService {
 | PlaytestService | `GetPlaytestStatus` | sessionId | session | Non |
 | PlaytestService | `CompletePlaytest` | sessionId, score | success | `playtest.completed` |
 | RecommendationService | `GetRecommendations` | userId, limit | recommendations[] | `game.rated` (indirect) |
-
 ## ⚙️ Variables d'environnement
 
 Chaque service utilise un fichier `.env` à sa racine.
