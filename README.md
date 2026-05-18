@@ -849,7 +849,6 @@ grpcurl -plaintext -d '{
 > portant un header `Authorization: Bearer <token>`. Elle n'est jamais exposée directement au client.
 
 ---
-
 ### 🎮 Game Designer Service — `gameDesigner.proto` — Port `50051`
 
 ```protobuf
@@ -881,42 +880,45 @@ service GameDesignerService {
 
 ---
 
+### 🧪 Tester avec Postman (gRPC)
+
+> **Prérequis** : Postman v10+ avec support gRPC natif.
+
+**Configuration initiale (à faire une seule fois) :**
+
+1. Ouvrir Postman → **New** → **gRPC Request**
+2. Dans le champ URL : `localhost:50051` (ou le port du service ciblé)
+3. Cliquer sur **Import a .proto file** et sélectionner `gameDesigner.proto`  
+   *(ou activer la réflexion si le serveur la supporte)*
+4. Sélectionner la méthode dans le menu déroulant **Method**
+5. Coller le JSON dans l'onglet **Message**
+6. Cliquer sur **Invoke**
+
+---
+
 #### `CreateGame` — Créer un jeu
 
-**Request** `CreateGameRequest` :
+- **URL** : `localhost:50051`
+- **Méthode** : `gamedesigner.GameDesignerService/CreateGame`
+- **Message** :
 
-| Champ | Type | Description |
-|---|---|---|
-| `name` | string | Nom du jeu |
-| `description` | string | Description |
-| `rules` | string | Règles |
-| `creatorId` | string | ID du créateur (injecté depuis le JWT) |
-| `categories` | repeated string | Catégories (ex: `["Stratégie","2 joueurs"]`) |
-
-**Response** `CreateGameResponse` :
-
-| Champ | Type | Description |
-|---|---|---|
-| `game` | Game | Objet jeu complet créé |
-
-**Exemple d'appel gRPC** :
-```bash
-grpcurl -plaintext -d '{
+```json
+{
   "name": "Chess Evolved",
-  "description": "Une réinvention du jeu d échecs",
+  "description": "Une réinvention du jeu d'échecs",
   "rules": "Chaque joueur dispose de 16 pièces...",
   "creatorId": "1716000000000-abc123",
   "categories": ["Stratégie", "2 joueurs", "Classique"]
-}' localhost:50051 gamedesigner.GameDesignerService/CreateGame
+}
 ```
 
-**Réponse** :
+**Réponse attendue** :
 ```json
 {
   "game": {
     "id": "1716050000000-def456",
     "name": "Chess Evolved",
-    "description": "Une réinvention du jeu d échecs",
+    "description": "Une réinvention du jeu d'échecs",
     "rules": "Chaque joueur dispose de 16 pièces...",
     "creatorId": "1716000000000-abc123",
     "averageRating": 0,
@@ -938,23 +940,14 @@ grpcurl -plaintext -d '{
 
 #### `GetGame` — Récupérer un jeu
 
-**Request** `GetGameRequest` :
+- **URL** : `localhost:50051`
+- **Méthode** : `gamedesigner.GameDesignerService/GetGame`
+- **Message** :
 
-| Champ | Type | Description |
-|---|---|---|
-| `gameId` | string | ID du jeu à récupérer |
-
-**Response** `GetGameResponse` :
-
-| Champ | Type | Description |
-|---|---|---|
-| `game` | Game | Objet jeu complet |
-
-**Exemple d'appel gRPC** :
-```bash
-grpcurl -plaintext -d '{
+```json
+{
   "gameId": "1716050000000-def456"
-}' localhost:50051 gamedesigner.GameDesignerService/GetGame
+}
 ```
 
 **Erreurs gRPC** :
@@ -967,31 +960,18 @@ grpcurl -plaintext -d '{
 
 #### `UpdateGame` — Modifier un jeu
 
-**Request** `UpdateGameRequest` :
+- **URL** : `localhost:50051`
+- **Méthode** : `gamedesigner.GameDesignerService/UpdateGame`
+- **Message** :
 
-| Champ | Type | Description |
-|---|---|---|
-| `gameId` | string | ID du jeu à modifier |
-| `name` | string | Nouveau nom |
-| `description` | string | Nouvelle description |
-| `rules` | string | Nouvelles règles |
-| `categories` | repeated string | Nouvelles catégories |
-
-**Response** `UpdateGameResponse` :
-
-| Champ | Type | Description |
-|---|---|---|
-| `success` | bool | `true` si la modification a réussi |
-
-**Exemple d'appel gRPC** :
-```bash
-grpcurl -plaintext -d '{
+```json
+{
   "gameId": "1716050000000-def456",
   "name": "Chess Evolved v2",
   "description": "Version améliorée",
   "rules": "Nouvelles règles...",
   "categories": ["Stratégie", "2 joueurs", "Compétitif"]
-}' localhost:50051 gamedesigner.GameDesignerService/UpdateGame
+}
 ```
 
 **Erreurs gRPC** :
@@ -1004,40 +984,26 @@ grpcurl -plaintext -d '{
 
 #### `DeleteGame` — Supprimer un jeu
 
-**Request** `DeleteGameRequest` :
+- **URL** : `localhost:50051`
+- **Méthode** : `gamedesigner.GameDesignerService/DeleteGame`
+- **Message** :
 
-| Champ | Type | Description |
-|---|---|---|
-| `gameId` | string | ID du jeu à supprimer |
-
-**Response** `DeleteGameResponse` :
-
-| Champ | Type | Description |
-|---|---|---|
-| `success` | bool | `true` si la suppression a réussi |
-
-**Exemple d'appel gRPC** :
-```bash
-grpcurl -plaintext -d '{
+```json
+{
   "gameId": "1716050000000-def456"
-}' localhost:50051 gamedesigner.GameDesignerService/DeleteGame
+}
 ```
 
 ---
 
 #### `ListGames` — Lister tous les jeux
 
-**Request** `ListGamesRequest` : *(vide)*
+- **URL** : `localhost:50051`
+- **Méthode** : `gamedesigner.GameDesignerService/ListGames`
+- **Message** :
 
-**Response** `ListGamesResponse` :
-
-| Champ | Type | Description |
-|---|---|---|
-| `games` | repeated Game | Liste de tous les jeux |
-
-**Exemple d'appel gRPC** :
-```bash
-grpcurl -plaintext -d '{}' localhost:50051 gamedesigner.GameDesignerService/ListGames
+```json
+{}
 ```
 
 ---
@@ -1047,18 +1013,16 @@ grpcurl -plaintext -d '{}' localhost:50051 gamedesigner.GameDesignerService/List
 > ⚠️ Cette méthode est **réservée à l'usage interne**. Elle est appelée uniquement
 > par le consumer Kafka `game.rated` du service lui-même — jamais exposée au client.
 
-**Request** `UpdateRatingRequest` :
+- **URL** : `localhost:50051`
+- **Méthode** : `gamedesigner.GameDesignerService/UpdateRating`
+- **Message** :
 
-| Champ | Type | Description |
-|---|---|---|
-| `gameId` | string | ID du jeu |
-| `newAverage` | double | Nouvelle note moyenne calculée |
-
-**Response** `UpdateRatingResponse` :
-
-| Champ | Type | Description |
-|---|---|---|
-| `success` | bool | `true` si la mise à jour a réussi |
+```json
+{
+  "gameId": "1716050000000-def456",
+  "newAverage": 8.5
+}
+```
 
 ---
 
@@ -1069,10 +1033,10 @@ syntax = "proto3";
 package playtest;
 
 service PlaytestService {
-  rpc StartPlaytest(StartPlaytestRequest)       returns (StartPlaytestResponse);
-  rpc SubmitMove(SubmitMoveRequest)             returns (SubmitMoveResponse);
+  rpc StartPlaytest(StartPlaytestRequest)         returns (StartPlaytestResponse);
+  rpc SubmitMove(SubmitMoveRequest)               returns (SubmitMoveResponse);
   rpc GetPlaytestStatus(GetPlaytestStatusRequest) returns (GetPlaytestStatusResponse);
-  rpc CompletePlaytest(CompletePlaytestRequest) returns (CompletePlaytestResponse);
+  rpc CompletePlaytest(CompletePlaytestRequest)   returns (CompletePlaytestResponse);
 }
 ```
 
@@ -1093,28 +1057,18 @@ service PlaytestService {
 
 #### `StartPlaytest` — Démarrer une session
 
-**Request** `StartPlaytestRequest` :
+- **URL** : `localhost:50052`
+- **Méthode** : `playtest.PlaytestService/StartPlaytest`
+- **Message** :
 
-| Champ | Type | Description |
-|---|---|---|
-| `gameId` | string | ID du jeu à tester |
-| `userId` | string | ID du joueur (injecté depuis le JWT) |
-
-**Response** `StartPlaytestResponse` :
-
-| Champ | Type | Description |
-|---|---|---|
-| `session` | PlaytestSession | Session créée avec `state: "in_progress"` |
-
-**Exemple d'appel gRPC** :
-```bash
-grpcurl -plaintext -d '{
+```json
+{
   "gameId": "1716050000000-def456",
   "userId": "1716000000000-abc123"
-}' localhost:50052 playtest.PlaytestService/StartPlaytest
+}
 ```
 
-**Réponse** :
+**Réponse attendue** :
 ```json
 {
   "session": {
@@ -1140,29 +1094,18 @@ grpcurl -plaintext -d '{
 
 #### `SubmitMove` — Soumettre un mouvement
 
-**Request** `SubmitMoveRequest` :
+- **URL** : `localhost:50052`
+- **Méthode** : `playtest.PlaytestService/SubmitMove`
+- **Message** :
 
-| Champ | Type | Description |
-|---|---|---|
-| `sessionId` | string | UUID de la session |
-| `moveJson` | string | Objet mouvement sérialisé en JSON string |
-
-**Response** `SubmitMoveResponse` :
-
-| Champ | Type | Description |
-|---|---|---|
-| `success` | bool | `true` si le mouvement a été enregistré |
-| `newState` | string | État de la session après le mouvement |
-
-**Exemple d'appel gRPC** :
-```bash
-grpcurl -plaintext -d '{
+```json
+{
   "sessionId": "550e8400-e29b-41d4-a716-446655440000",
   "moveJson": "{\"action\": \"move\", \"piece\": \"pawn\", \"from\": \"e2\", \"to\": \"e4\", \"turn\": 1}"
-}' localhost:50052 playtest.PlaytestService/SubmitMove
+}
 ```
 
-**Réponse** :
+**Réponse attendue** :
 ```json
 {
   "success": true,
@@ -1181,23 +1124,14 @@ grpcurl -plaintext -d '{
 
 #### `GetPlaytestStatus` — État d'une session
 
-**Request** `GetPlaytestStatusRequest` :
+- **URL** : `localhost:50052`
+- **Méthode** : `playtest.PlaytestService/GetPlaytestStatus`
+- **Message** :
 
-| Champ | Type | Description |
-|---|---|---|
-| `sessionId` | string | UUID de la session |
-
-**Response** `GetPlaytestStatusResponse` :
-
-| Champ | Type | Description |
-|---|---|---|
-| `session` | PlaytestSession | État complet de la session |
-
-**Exemple d'appel gRPC** :
-```bash
-grpcurl -plaintext -d '{
+```json
+{
   "sessionId": "550e8400-e29b-41d4-a716-446655440000"
-}' localhost:50052 playtest.PlaytestService/GetPlaytestStatus
+}
 ```
 
 **Erreurs gRPC** :
@@ -1210,28 +1144,18 @@ grpcurl -plaintext -d '{
 
 #### `CompletePlaytest` — Terminer une session
 
-**Request** `CompletePlaytestRequest` :
+- **URL** : `localhost:50052`
+- **Méthode** : `playtest.PlaytestService/CompletePlaytest`
+- **Message** :
 
-| Champ | Type | Description |
-|---|---|---|
-| `sessionId` | string | UUID de la session à clôturer |
-| `score` | int32 | Score final obtenu |
-
-**Response** `CompletePlaytestResponse` :
-
-| Champ | Type | Description |
-|---|---|---|
-| `success` | bool | `true` si la session est bien clôturée |
-
-**Exemple d'appel gRPC** :
-```bash
-grpcurl -plaintext -d '{
+```json
+{
   "sessionId": "550e8400-e29b-41d4-a716-446655440000",
   "score": 850
-}' localhost:50052 playtest.PlaytestService/CompletePlaytest
+}
 ```
 
-**Réponse** :
+**Réponse attendue** :
 ```json
 {
   "success": true
@@ -1250,7 +1174,7 @@ grpcurl -plaintext -d '{
 
 ---
 
-### 🤖 Recommendation Service — `recommendation.proto` — Port `50054`
+###  Recommendation Service — `recommendation.proto` — Port `50054`
 
 ```protobuf
 syntax = "proto3";
@@ -1265,36 +1189,18 @@ service RecommendationService {
 
 #### `GetRecommendations` — Obtenir des recommandations
 
-**Request** `GetRecommendationsRequest` :
+- **URL** : `localhost:50054`
+- **Méthode** : `recommendation.RecommendationService/GetRecommendations`
+- **Message** :
 
-| Champ | Type | Description |
-|---|---|---|
-| `userId` | string | ID de l'utilisateur cible |
-| `limit` | int32 | Nombre maximum de résultats (défaut : 10) |
-
-**Response** `GetRecommendationsResponse` :
-
-| Champ | Type | Description |
-|---|---|---|
-| `recommendations` | repeated GameRecommendation | Liste des jeux recommandés |
-
-**Type `GameRecommendation`** :
-
-| Champ | Type | Description |
-|---|---|---|
-| `gameId` | string | ID du jeu recommandé |
-| `name` | string | Nom du jeu |
-| `score` | double | Score de pertinence |
-
-**Exemple d'appel gRPC** :
-```bash
-grpcurl -plaintext -d '{
+```json
+{
   "userId": "1716000000000-abc123",
   "limit": 5
-}' localhost:50054 recommendation.RecommendationService/GetRecommendations
+}
 ```
 
-**Réponse** :
+**Réponse attendue** :
 ```json
 {
   "recommendations": [
@@ -1320,7 +1226,7 @@ grpcurl -plaintext -d '{
 | AuthService | `Register` | username, password, email | success, userId | Non |
 | AuthService | `Login` | username, password | token, userId | Non |
 | AuthService | `VerifyToken` | token | valid, userId, username | Non |
-| GameDesignerService | `CreateGame` | name, description, rules, creatorId, categories | game | `game.published` ✅ |
+| GameDesignerService | `CreateGame` | name, description, rules, creatorId, categories | game | `game.published` |
 | GameDesignerService | `GetGame` | gameId | game | Non |
 | GameDesignerService | `UpdateGame` | gameId, name, description, rules, categories | success | Non |
 | GameDesignerService | `DeleteGame` | gameId | success | Non |
@@ -1329,26 +1235,8 @@ grpcurl -plaintext -d '{
 | PlaytestService | `StartPlaytest` | gameId, userId | session | Non |
 | PlaytestService | `SubmitMove` | sessionId, moveJson | success, newState | Non |
 | PlaytestService | `GetPlaytestStatus` | sessionId | session | Non |
-| PlaytestService | `CompletePlaytest` | sessionId, score | success | `playtest.completed` ✅ |
-| RecommendationService | `GetRecommendations` | userId, limit | recommendations[] | `game.rated` ✅ (indirect) |
-
----
-
-### Installer grpcurl pour tester directement
-
-[grpcurl](https://github.com/fullstorydev/grpcurl) est un outil en ligne de commande pour appeler des services gRPC, similaire à curl pour HTTP.
-
-```bash
-# Windows (via Chocolatey)
-choco install grpcurl
-
-# Ou télécharger le binaire directement
-# https://github.com/fullstorydev/grpcurl/releases
-```
-
-> ⚠️ Les services utilisent `createInsecure()` — utiliser le flag `-plaintext`
-> sur tous les appels grpcurl comme montré dans les exemples ci-dessus.
----
+| PlaytestService | `CompletePlaytest` | sessionId, score | success | `playtest.completed` |
+| RecommendationService | `GetRecommendations` | userId, limit | recommendations[] | `game.rated` (indirect) |
 
 ## ⚙️ Variables d'environnement
 
